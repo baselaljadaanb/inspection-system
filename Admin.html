@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة إدارة القائد — نظام التفقد اليومي</title>
+<style>
+:root{
+  --navy:#0b1f3a;
+  --navy2:#122c52;
+  --gold:#c9a24b;
+  --bg:#eef2f7;
+  --card:#ffffff;
+  --ink:#1e293b;
+  --muted:#64748b;
+  --line:#e2e8f0;
+  --green:#16a34a;
+  --green-bg:#dcfce7;
+  --blue:#1d4ed8;
+  --blue2:#2563eb;
+  --red:#dc2626;
+  --red-bg:#fee2e2;
+  --radius:14px;
+  --shadow:0 6px 18px rgba(15,23,42,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:"Segoe UI",Tahoma,"Noto Kufi Arabic",Arial,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  min-height:100vh;
+}
+button,input{font-family:inherit}
+header{
+  background:linear-gradient(135deg,var(--navy),var(--navy2));
+  color:#fff;
+  padding:18px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  box-shadow:var(--shadow);
+  position:sticky;
+  top:0;
+  z-index:20;
+}
+.brand h1{font-size:20px;font-weight:800;letter-spacing:.3px}
+.brand .sub{font-size:12px;color:#b9c7dd;margin-top:3px}
+.badge-admin{
+  background:rgba(201,162,75,.15);
+  border:1px solid rgba(201,162,75,.5);
+  color:var(--gold);
+  font-size:12px;
+  font-weight:700;
+  padding:6px 14px;
+  border-radius:999px;
+  white-space:nowrap;
+}
+main{max-width:860px;margin:0 auto;padding:20px 16px 30px}
+.card{
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:18px;
+  margin-bottom:16px;
+}
+.card-head{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:6px;
+}
+.step-num{
+  width:30px;height:30px;
+  border-radius:50%;
+  background:var(--navy);
+  color:var(--gold);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  font-size:15px;
+  flex-shrink:0;
+}
+.card-head h2{font-size:17px;color:var(--navy)}
+.hint{font-size:13px;color:var(--muted);margin:6px 0 14px;line-height:1.7}
+.file-label{
+  display:block;
+  padding:16px;
+  text-align:center;
+  border:2px dashed #94a3b8;
+  border-radius:12px;
+  color:var(--muted);
+  font-weight:700;
+  cursor:pointer;
+  transition:.2s;
+  margin-bottom:12px;
+}
+.file-label:hover{border-color:var(--blue);color:var(--blue)}
+.hidden-input{display:none}
+.row-between{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.btn{
+  border:none;
+  border-radius:10px;
+  padding:11px 18px;
+  font-size:14px;
+  font-weight:800;
+  cursor:pointer;
+  transition:.2s;
+}
+.btn:active{transform:scale(.96)}
+.btn.primary{background:var(--blue);color:#fff}
+.btn.primary:hover{background:var(--blue2)}
+.btn.ghost{background:#f1f5f9;color:var(--muted)}
+.btn.ghost:hover{background:#e2e8f0}
+.btn.generate{
+  width:100%;
+  padding:20px;
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(135deg,#15803d,#16a34a);
+  color:#fff;
+  font-size:18px;
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:0 10px 24px rgba(22,163,74,.35);
+  transition:.2s;
+}
+.btn.generate:hover{filter:brightness(1.08)}
+.btn.generate:active{transform:scale(.98)}
+.btn.generate:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;filter:none}
+.status{font-size:13px;font-weight:700;margin-top:12px;color:var(--green)}
+.status.err{color:var(--red)}
+.stat-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:#f1f5f9;
+  border-radius:999px;
+  padding:8px 16px;
+  font-size:13px;
+  font-weight:800;
+  color:var(--navy);
+}
+.stat-pill b{color:var(--blue)}
+.batt-filter{display:flex;gap:6px}
+.mini{
+  border:1.5px solid var(--line);
+  background:#fff;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:800;
+  padding:7px 14px;
+  border-radius:999px;
+  cursor:pointer;
+  transition:.2s;
+}
+.mini.active{background:var(--navy);color:var(--gold);border-color:var(--navy)}
+#previewList{display:flex;flex-direction:column;gap:8px;max-height:380px;overflow:auto;margin-top:12px}
+.p-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:10px 12px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:#f8fafc;
+  flex-wrap:wrap;
+}
+.p-row .info{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1;min-width:0}
+.p-row .pi{font-size:12px;font-weight:800;color:var(--blue)}
+.p-row .pn{font-weight:800;font-size:14px}
+.p-row .pp{font-size:11px;color:var(--muted)}
+.p-row .pb{font-size:12px;color:var(--muted);background:#eef2f7;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.empty-box{
+  text-align:center;
+  color:var(--muted);
+  padding:34px 0;
+  border:2px dashed var(--line);
+  border-radius:12px;
+  font-weight:700;
+  margin-top:12px;
+}
+.gen-note{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:var(--green-bg);
+  color:#166534;
+  border-radius:10px;
+  padding:12px 14px;
+  font-size:13px;
+  font-weight:700;
+  margin-bottom:14px;
+}
+footer{text-align:center;padding:10px 16px 26px;color:var(--muted);font-size:12px}
+@media(max-width:520px){
+  .brand h1{font-size:16px}
+  .row-between{flex-direction:column;align-items:stretch}
+  .batt-filter{justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>لوحة إدارة القائد</h1>
+    <div class="sub">نظام التفقد اليومي</div>
+  </div>
+  <span class="badge-admin">ملف المسؤولين</span>
+</header>
+
+<main>
+
+  <section class="card">
+    <div class="card-head">
+      <span class="step-num">1</span>
+      <h2>استيراد ملف القوة</h2>
+    </div>
+    <p class="hint">ارفع ملف Excel / CSV يحتوي على أعمدة: "الرقم الذاتي"، "الاسم الصريح"، "الكتيبة"، "النقطة". النظام يتعرف على رؤوس الأعمدة تلقائياً مهما كانت رتبتها أو لغتها، وعلى الفاصل (فاصلة، فاصلة منقوطة، أو تبويب) وترميز الملف.</p>
+    <label class="file-label" id="fileLabel">📂 اختر ملف CSV / Excel من الجهاز</label>
+    <input type="file" id="csvFile" accept=".csv,.txt,.xls,text/csv" class="hidden-input">
+    <div class="row-between">
+      <button class="btn primary" id="importBtn">استيراد وتحليل الملف</button>
+      <button class="btn ghost" id="defaultBtn">استخدام القائمة الافتراضية (360 عنصراً)</button>
+    </div>
+    <div class="status" id="importStatus"></div>
+  </section>
+
+  <section class="card" id="previewCard">
+    <div class="card-head">
+      <span class="step-num">2</span>
+      <h2>معاينة القائمة</h2>
+    </div>
+    <div class="row-between">
+      <span class="stat-pill">مجموع القوة: <b id="previewCount">0</b></span>
+      <div class="batt-filter">
+        <button class="mini active" data-f="0">الكل</button>
+        <button class="mini" data-f="1">الكتيبة الأولى</button>
+        <button class="mini" data-f="2">الكتيبة الثانية</button>
+      </div>
+    </div>
+    <div id="previewList"><div class="empty-box">لا توجد بيانات بعد — قم باستيراد الملف أولاً</div></div>
+  </section>
+
+  <section class="card" id="generateCard">
+    <div class="card-head">
+      <span class="step-num">3</span>
+      <h2>توليد ملف التفقد</h2>
+    </div>
+    <p class="hint">سيتم توليد ملف "Attendance.html" مدمجاً بداخله قائمة القوة المحللة، جاهزاً للإرسال إلى مسؤولي التفقد. الملف المستلم يعمل فوراً بدون إنترنت وبدون أي أدوات إدارة.</p>
+    <div class="gen-note" id="genNote">💡 سيتم توليد الملف بناءً على القائمة المعروضة أعلاه</div>
+    <button class="btn generate" id="generateBtn" disabled>💾 توليد ملف تفقد المسؤولين المحدث</button>
+    <div class="status" id="genStatus"></div>
+  </section>
+
+</main>
+
+<footer>نظام التفقد اليومي — ملف الإدارة (يُستخدم من قبل القائد فقط)</footer>
+
+<script type="text/template" id="attTpl">
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سجل التفقد اليومي</title>
+<style>
+:root{
+  --navy:#0b1f3a;--navy2:#122c52;--gold:#c9a24b;--bg:#eef2f7;--card:#ffffff;
+  --ink:#1e293b;--muted:#64748b;--line:#e2e8f0;
+  --green:#16a34a;--green-bg:#dcfce7;--orange:#f59e0b;--orange-bg:#fef3c7;
+  --red:#dc2626;--red-bg:#fee2e2;--gray:#6b7280;--gray-bg:#f3f4f6;--blue:#1d4ed8;--blue2:#2563eb;
+  --radius:14px;--shadow:0 6px 18px rgba(15,23,42,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:"Segoe UI",Tahoma,"Noto Kufi Arabic",Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+button,input,select{font-family:inherit}
+header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:16px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:var(--shadow);position:sticky;top:0;z-index:20}
+.brand h1{font-size:20px;font-weight:800;line-height:1.2}
+.brand .date{font-size:12px;color:#b9c7dd;margin-top:3px}
+.badge-batt{background:rgba(201,162,75,.15);border:1px solid rgba(201,162,75,.5);color:var(--gold);font-size:12px;font-weight:700;padding:6px 14px;border-radius:999px;white-space:nowrap;flex-shrink:0}
+main{max-width:960px;margin:0 auto;padding:0 10px 20px}
+.counters{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:18px 0 0}
+.counter-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 8px;text-align:center;position:relative;overflow:hidden}
+.counter-card::before{content:"";position:absolute;top:0;right:0;left:0;height:4px}
+.counter-card.total::before{background:var(--navy)}
+.counter-card.present::before{background:var(--green)}
+.counter-card.excused::before{background:var(--orange)}
+.counter-card.unexcused::before{background:var(--red)}
+.counter-card.notchecked::before{background:var(--gray)}
+.counter-card .num{font-size:32px;font-weight:800;line-height:1.1}
+.counter-card.total .num{color:var(--navy)}
+.counter-card.present .num{color:var(--green)}
+.counter-card.excused .num{color:var(--orange)}
+.counter-card.unexcused .num{color:var(--red)}
+.counter-card.notchecked .num{color:var(--gray)}
+.counter-card .label{font-size:12px;color:var(--muted);margin-top:3px;font-weight:700}
+.tabs{display:flex;gap:8px;padding:16px 0 0}
+.tab{flex:1;min-height:48px;padding:12px 8px;border:2px solid var(--line);border-radius:12px;background:var(--card);color:var(--muted);font-weight:800;font-size:15px;cursor:pointer;box-shadow:var(--shadow);transition:.2s;touch-action:manipulation}
+.tab.active{background:var(--navy);color:var(--gold);border-color:var(--navy)}
+.tab:active{transform:scale(.97)}
+.toolbar{display:flex;gap:10px;padding:16px 0 0;align-items:center;flex-wrap:wrap}
+#search{flex:1;min-width:200px;min-height:48px;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:var(--card);font-size:16px;outline:none;transition:.2s}
+#search:focus{border-color:var(--blue)}
+.loc-label{font-size:12px;font-weight:800;color:var(--muted);white-space:nowrap}
+#locationFilter{min-height:48px;padding:10px 12px;border:2px solid var(--line);border-radius:12px;background:var(--card);font-size:16px;outline:none;transition:.2s;color:var(--ink);cursor:pointer;max-width:100%}
+#locationFilter:focus{border-color:var(--blue)}
+.legend{font-size:12px;color:var(--muted);white-space:nowrap}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:10px;padding:16px 0}
+.soldier-chip{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:64px;padding:12px 8px;border-radius:12px;border:2px solid var(--line);background:var(--card);cursor:pointer;transition:.15s;box-shadow:var(--shadow);touch-action:manipulation}
+.soldier-chip .s-id{font-size:12px;font-weight:800;color:var(--blue)}
+.soldier-chip .s-name{font-weight:800;font-size:14px;text-align:center;overflow-wrap:anywhere}
+.soldier-chip .s-point{font-size:11px;color:var(--muted);text-align:center}
+.soldier-chip .s-status{font-size:11px;font-weight:800;padding:4px 12px;border-radius:999px;color:var(--muted);background:#f1f5f9;white-space:nowrap}
+.soldier-chip.notchecked{border-color:var(--line);background:var(--gray-bg)}
+.soldier-chip.present{border-color:var(--green);background:var(--green-bg)}
+.soldier-chip.present .s-status{background:var(--green);color:#fff}
+.soldier-chip.excused{border-color:var(--orange);background:var(--orange-bg)}
+.soldier-chip.excused .s-status{background:var(--orange);color:#fff}
+.soldier-chip.unexcused{border-color:var(--red);background:var(--red-bg)}
+.soldier-chip.unexcused .s-status{background:var(--red);color:#fff}
+.soldier-chip:active{transform:scale(.95)}
+.empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 0;background:var(--card);border-radius:var(--radius);border:2px dashed var(--line);font-weight:700}
+.export-wrap{position:sticky;bottom:0;z-index:15;padding:12px 0 20px;display:flex;flex-direction:column;align-items:center;gap:10px;background:linear-gradient(180deg,rgba(238,242,247,0),var(--bg) 45%)}
+#newDayBtn{width:100%;max-width:480px;min-height:52px;padding:12px 14px;border:2px solid var(--blue2);border-radius:14px;background:#fff;color:var(--blue);font-size:15px;font-weight:800;cursor:pointer;transition:.2s;touch-action:manipulation}
+#newDayBtn:hover{background:var(--blue);color:#fff}
+#newDayBtn:active{transform:scale(.97)}
+#exportBtn{width:100%;max-width:480px;min-height:56px;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 8px 22px rgba(29,78,216,.35);transition:.2s;touch-action:manipulation}
+#exportBtn:active{transform:scale(.97)}
+footer{text-align:center;padding:6px 10px 20px;color:var(--muted);font-size:12px}
+@media(max-width:600px){
+  main{max-width:100%;margin:10px;padding:12px}
+  header{padding:14px 12px}
+  .brand h1{font-size:16px}
+  .brand .date{font-size:11px}
+  .badge-batt{font-size:10px;padding:5px 10px}
+  .counters{grid-template-columns:repeat(2,1fr);gap:8px;padding:12px 0 0}
+  .counter-card .num{font-size:26px}
+  .counter-card .label{font-size:11px}
+  .tabs{padding:12px 0 0}
+  .tab{font-size:14px;padding:10px 6px}
+  .toolbar{padding:12px 0 0;flex-direction:column;align-items:stretch;gap:8px}
+  #search{width:100%;min-width:0}
+  .loc-label{white-space:normal}
+  #locationFilter{width:100%}
+  .legend{white-space:normal;text-align:center}
+  .grid{grid-template-columns:1fr;gap:10px;padding:12px 0}
+  .soldier-chip{min-height:56px;padding:14px}
+  .soldier-chip .s-name{font-size:13px}
+  .export-wrap{padding:10px 0 12px}
+  #newDayBtn,#exportBtn{max-width:100%}
+  footer{padding:6px 10px 16px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <h1>سجل التفقد اليومي</h1>
+    <div class="date" id="headerDate"></div>
+  </div>
+  <span class="badge-batt" id="battBadge">الكتيبة الأولى</span>
+</header>
+<main>
+  <section class="counters">
+    <div class="counter-card total"><div class="num" id="cntTotal">0</div><div class="label">مجموع القوة</div></div>
+    <div class="counter-card notchecked"><div class="num" id="cntNotChecked">0</div><div class="label">غير محدد</div></div>
+    <div class="counter-card present"><div class="num" id="cntPresent">0</div><div class="label">حضور</div></div>
+    <div class="counter-card excused"><div class="num" id="cntExcused">0</div><div class="label">غياب مبرر</div></div>
+    <div class="counter-card unexcused"><div class="num" id="cntUnexcused">0</div><div class="label">غياب غير مبرر</div></div>
+  </section>
+  <nav class="tabs">
+    <button class="tab active" data-batt="1">الكتيبة الأولى</button>
+    <button class="tab" data-batt="2">الكتيبة الثانية</button>
+  </nav>
+  <div class="toolbar">
+    <input type="text" id="search" placeholder="بحث عن الرقم الذاتي أو الاسم الصريح أو النقطة...">
+    <label class="loc-label" for="locationFilter">📍 تصفية حسب النقطة</label>
+    <select id="locationFilter"></select>
+    <span class="legend" id="legend">اضغط على البطاقة لتغيير الحالة</span>
+  </div>
+  <div class="grid" id="soldierGrid"></div>
+  <div class="export-wrap">
+    <button id="newDayBtn">🔄 بدء تفقد يوم جديد</button>
+    <button id="exportBtn">استخراج تقرير التفقد النهائي (Excel)</button>
+  </div>
+</main>
+<footer>نظام التفقد اليومي — ملف التفقد الرسمي</footer>
+<script>
+(function(){
+  'use strict';
+  var SOLDIERS = /*__SOLDIERS__*/;
+  var KEY='__KEY__';
+  var DB_KEY='attendance_'+KEY;
+  var BATT_KEY='attendance_batt_'+KEY;
+  var db={soldiers:SOLDIERS,attendance:{}};
+  var activeBatt=1;
+  function $id(id){return document.getElementById(id);}
+  function load(){
+    try{
+      var raw=localStorage.getItem(DB_KEY);
+      if(raw){
+        var d=JSON.parse(raw);
+        if(d&&d.soldiers&&d.soldiers.length===SOLDIERS.length){
+          if(!d.attendance) d.attendance={};
+          return d;
+        }
+      }
+    }catch(e){}
+    return db;
+  }
+  function save(){try{localStorage.setItem(DB_KEY,JSON.stringify(db));}catch(e){}}
+  function todayKey(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  function nowTime(){var d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+  function battName(b){return b===1?'الكتيبة الأولى':'الكتيبة الثانية';}
+  var STATUS_SEQ=['','h','e','u'];
+  function normalizeStatus(st){
+    if(st==='p')return 'h';
+    if(st==='a')return 'u';
+    if(st==='h'||st==='e'||st==='u')return st;
+    return '';
+  }
+  function nextStatus(st){var cur=normalizeStatus(st);var idx=STATUS_SEQ.indexOf(cur);return STATUS_SEQ[(idx+1)%STATUS_SEQ.length];}
+  function statusLabel(st){var cur=normalizeStatus(st);if(cur==='h')return 'حضور';if(cur==='e')return 'غياب مبرر';if(cur==='u')return 'غياب غير مبرر';return 'غير محدد';}
+  function statusClass(st){var cur=normalizeStatus(st);if(cur==='h')return 'present';if(cur==='e')return 'excused';if(cur==='u')return 'unexcused';return 'notchecked';}
+  function getSoldiersByBatt(b){return db.soldiers.filter(function(s){return s['الكتيبة']===b;});}
+  function populateLocations(){
+    var sel=$id('locationFilter');
+    var cur=String(sel.value||'');
+    var list=getSoldiersByBatt(activeBatt);
+    var locs=[];
+    list.forEach(function(s){
+      var p=String(s['النقطة']||'').trim();
+      if(p&&locs.indexOf(p)<0)locs.push(p);
+    });
+    locs.sort(function(a,b){return a.localeCompare(b,'ar');});
+    sel.innerHTML='';
+    var all=document.createElement('option');
+    all.value='';
+    all.textContent='كل النقاط';
+    sel.appendChild(all);
+    locs.forEach(function(p){
+      var o=document.createElement('option');
+      o.value=p;
+      o.textContent=p;
+      sel.appendChild(o);
+    });
+    if(cur&&locs.indexOf(cur)>-1)sel.value=cur;else sel.value='';
+  }
+  function getFiltered(){
+    var q=String($id('search').value||'').trim().toLowerCase();
+    var loc=String($id('locationFilter').value||'').trim();
+    var list=getSoldiersByBatt(activeBatt);
+    if(loc)list=list.filter(function(s){return String(s['النقطة']||'')===loc;});
+    if(!q)return list;
+    return list.filter(function(s){
+      return String(s['الرقم الذاتي']||'').toLowerCase().indexOf(q)>-1
+        ||String(s['الاسم الصريح']||'').toLowerCase().indexOf(q)>-1
+        ||String(s['النقطة']||'').toLowerCase().indexOf(q)>-1;
+    });
+  }
+  function updateCounters(){
+    var list=getSoldiersByBatt(activeBatt);
+    var att=db.attendance[todayKey()]||{};
+    var p=0,e=0,u=0;
+    list.forEach(function(s){
+      var st=normalizeStatus(att[s.id]);
+      if(st==='h')p++;else if(st==='e')e++;else if(st==='u')u++;
+    });
+    $id('cntTotal').textContent=list.length;
+    $id('cntNotChecked').textContent=list.length-p-e-u;
+    $id('cntPresent').textContent=p;
+    $id('cntExcused').textContent=e;
+    $id('cntUnexcused').textContent=u;
+    $id('battBadge').textContent=battName(activeBatt);
+  }
+  function renderTabs(){
+    var tabs=document.querySelectorAll('.tab');
+    for(var i=0;i<tabs.length;i++){
+      var t=tabs[i];
+      if(parseInt(t.getAttribute('data-batt'),10)===activeBatt)t.classList.add('active');
+      else t.classList.remove('active');
+    }
+  }
+  function renderGrid(){
+    var grid=$id('soldierGrid');
+    var q=String($id('search').value||'').trim();
+    var loc=String($id('locationFilter').value||'').trim();
+    var list=getFiltered();
+    var today=todayKey();
+    var att=db.attendance[today]||{};
+    grid.innerHTML='';
+    $id('legend').textContent=(q||loc)?('عرض '+list.length+' من '+getSoldiersByBatt(activeBatt).length+' عنصر'):'اضغط على البطاقة لتغيير الحالة';
+    if(!list.length){
+      var empty=document.createElement('div');
+      empty.className='empty';
+      empty.textContent='لا يوجد عناصر مطابقة';
+      grid.appendChild(empty);
+      return;
+    }
+    list.forEach(function(s){
+      var st=att[s.id];
+      var chip=document.createElement('button');
+      chip.type='button';
+      chip.className='soldier-chip'+(statusClass(st)?' '+statusClass(st):'');
+      var idEl=document.createElement('span');idEl.className='s-id';idEl.textContent=s['الرقم الذاتي'];
+      var nameEl=document.createElement('span');nameEl.className='s-name';nameEl.textContent=s['الاسم الصريح'];
+      var pointEl=document.createElement('span');pointEl.className='s-point';pointEl.textContent='النقطة: '+s['النقطة'];
+      var stEl=document.createElement('span');stEl.className='s-status';stEl.textContent=statusLabel(st);
+      chip.appendChild(idEl);chip.appendChild(nameEl);chip.appendChild(pointEl);chip.appendChild(stEl);
+      chip.addEventListener('click',function(){toggleStatus(s.id);});
+      grid.appendChild(chip);
+    });
+  }
+  function toggleStatus(id){
+    var today=todayKey();
+    if(!db.attendance[today])db.attendance[today]={};
+    var att=db.attendance[today];
+    att[id]=nextStatus(att[id]);
+    save();updateCounters();renderGrid();
+  }
+  function startNewDay(){
+    if(!confirm('هل أنت متأكد من تصفير تفقد اليوم الحالي وبدء يوم جديد؟'))return;
+    if(!db.attendance) db.attendance={};
+    var today=todayKey();
+    var att={};
+    db.soldiers.forEach(function(s){att[s.id]='';});
+    db.attendance[today]=att;
+    save();
+    updateCounters();
+    renderGrid();
+  }
+  function htmlEscape(v){return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function compareSelfNum(a,b){
+    var na=parseInt(a['الرقم الذاتي'],10),nb=parseInt(b['الرقم الذاتي'],10);
+    if(!isNaN(na)&&!isNaN(nb))return na-nb;
+    return String(a['الرقم الذاتي']).localeCompare(String(b['الرقم الذاتي']));
+  }
+  function exportCSV(){
+    var today=todayKey();
+    var time=nowTime();
+    var headers=['الرقم الذاتي','الاسم الثلاثي','النقطة','الكتيبة','حالة التفقد الحالية','التاريخ','الوقت'];
+    var all=db.soldiers.slice().sort(function(a,b){return (a['الكتيبة']-b['الكتيبة'])||compareSelfNum(a,b);});
+    var att=db.attendance[today]||{};
+    var body='';
+    all.forEach(function(s){
+      var st=statusLabel(att[s.id]);
+      var cells=[s['الرقم الذاتي'],s['الاسم الصريح'],s['النقطة'],battName(s['الكتيبة']),st,today,time]
+        .map(function(v){return '<td>'+htmlEscape(v)+'</td>';}).join('');
+      body+='<tr>'+cells+'</tr>';
+    });
+    var widths=[16,45,24,20,24,14,10].map(function(w){return '<col style="width:'+w+'pt"/>';}).join('');
+    var html='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">'
+      +'<head><meta http-equiv="content-type" content="application/vnd.ms-excel; charset=utf-8"/>'
+      +'<xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>'
+      +'<x:Name>تقرير التفقد</x:Name>'
+      +'<x:WorksheetOptions><x:DisplayRightToLeft/></x:WorksheetOptions>'
+      +'</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml>'
+      +'<style>th{font-weight:bold;color:#ffffff;background-color:#1F4E79;border:1pt solid #8fa8c8;white-space:nowrap;}'
+      +'td{white-space:nowrap;border:1pt solid #d0d7e2;mso-number-format:"@";}</style>'
+      +'</head><body>'
+      +'<table dir="rtl" style="border-collapse:collapse">'
+      +'<colgroup>'+widths+'</colgroup>'
+      +'<tr>'+headers.map(function(h){return '<th>'+h+'</th>';}).join('')+'</tr>'
+      +body
+      +'</table></body></html>';
+    var blob=new Blob(['\ufeff'+html],{type:'application/vnd.ms-excel;charset=utf-8;'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url;
+    a.download='تقرير_التفقد_النهائي_'+today+'.xls';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function(){URL.revokeObjectURL(url);},1500);
+  }
+  function applySearch(){renderGrid();}
+  function init(){
+    db=load();
+    activeBatt=(function(){try{var v=parseInt(localStorage.getItem(BATT_KEY),10);return (v===1||v===2)?v:1;}catch(e){return 1;}})();
+    var d=new Date();
+    $id('headerDate').textContent=new Intl.DateTimeFormat('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'}).format(d);
+    var tabs=document.querySelectorAll('.tab');
+    for(var i=0;i<tabs.length;i++){
+      tabs[i].addEventListener('click',function(){
+        activeBatt=parseInt(this.getAttribute('data-batt'),10);
+        try{localStorage.setItem(BATT_KEY,String(activeBatt));}catch(e){}
+        populateLocations();
+        renderTabs();updateCounters();renderGrid();
+      });
+    }
+    $id('search').addEventListener('input',applySearch);
+    $id('search').addEventListener('keyup',applySearch);
+    $id('search').addEventListener('change',applySearch);
+    $id('locationFilter').addEventListener('change',applySearch);
+    $id('newDayBtn').addEventListener('click',startNewDay);
+    $id('exportBtn').addEventListener('click',exportCSV);
+    populateLocations();
+    renderTabs();updateCounters();renderGrid();
+  }
+  init();
+})();
+__CLOSE_SCRIPT__
+</body>
+</html>
+</script>
+
+<script>
+(function(){
+  'use strict';
+
+  var parsedSoldiers=[];
+  var previewBatt=0;
+
+  function $id(id){return document.getElementById(id);}
+
+  function battName(b){return b===1?'الكتيبة الأولى':'الكتيبة الثانية';}
+
+  function detectDelim(line){
+    var counts={',':0,';':0,'\t':0};
+    var inQ=false;
+    for(var i=0;i<line.length;i++){
+      var c=line[i];
+      if(c==='"'){inQ=!inQ;continue;}
+      if(!inQ&&counts[c]!==undefined) counts[c]++;
+    }
+    if(counts['\t']>counts[',']&&counts['\t']>counts[';']) return '\t';
+    if(counts[';']>counts[',']) return ';';
+    return ',';
+  }
+
+  function splitLine(line,delim){
+    var parts=[],current='',inQuotes=false;
+    for(var i=0;i<line.length;i++){
+      var c=line[i];
+      if(inQuotes){
+        if(c==='"'){
+          if(line[i+1]==='"'){current+='"';i++;}
+          else inQuotes=false;
+        }else current+=c;
+      }else{
+        if(c==='"') inQuotes=true;
+        else if(c===delim){parts.push(current.trim());current='';}
+        else current+=c;
+      }
+    }
+    parts.push(current.trim());
+    return parts;
+  }
+
+  function parseRows(text){
+    text=String(text).replace(/^\uFEFF/,'');
+    var rawLines=text.split(/\r\n|\n/);
+    var rows=[];
+    for(var i=0;i<rawLines.length;i++){
+      var line=rawLines[i].trim();
+      if(!line) continue;
+      var delim=detectDelim(line);
+      var parts=splitLine(line,delim);
+      if(parts.join('').trim()) rows.push(parts);
+    }
+    return rows;
+  }
+
+  function decodeText(buf){
+    var bom=new Uint8Array(buf,0,3);
+    if(bom[0]===0xEF&&bom[1]===0xBB&&bom[2]===0xBF) return new TextDecoder('utf-8').decode(buf);
+    var utf8=new TextDecoder('utf-8').decode(buf);
+    if(utf8.indexOf('\uFFFD')===-1) return utf8;
+    try{return new TextDecoder('windows-1256').decode(buf);}
+    catch(e){return utf8;}
+  }
+
+  function toAsciiDigits(s){
+    var map={'٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9','۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9'};
+    return String(s).replace(/[٠-٩۰-۹]/g,function(d){return map[d];});
+  }
+
+  function normBatt(v){
+    v=String(v||'').trim();
+    if(!v) return null;
+    var n=toAsciiDigits(v);
+    var combined=v+' '+n;
+    if(/ثان|الثانية|الثاني|2/.test(combined)) return 2;
+    if(/أول|الاول|الأولى|الأول|1/.test(combined)) return 1;
+    return null;
+  }
+
+  var COL_KEYWORDS=[
+    {key:'الرقم الذاتي',words:['الرقم','ذاتي','وظيفي','ID']},
+    {key:'الاسم الصريح',words:['الاسم','الصريح','الثلاثي','Name']},
+    {key:'الكتيبة',words:['الكتيبة','الفصيل','القسم','Group']},
+    {key:'النقطة',words:['النقطة','الموقع','الثكنة','Location']},
+    {key:'موجود أم لا',words:['موجود','الحالة','حالة','Status']}
+  ];
+
+  function buildColMap(row){
+    var map={},used={};
+    for(var i=0;i<row.length;i++){
+      var h=String(row[i]).replace(/^"|"$/g,'').trim().toLowerCase();
+      if(!h) continue;
+      for(var k=0;k<COL_KEYWORDS.length;k++){
+        var def=COL_KEYWORDS[k];
+        if(used[def.key]) continue;
+        for(var w=0;w<def.words.length;w++){
+          if(h.indexOf(def.words[w].toLowerCase())>-1){
+            map[def.key]=i;
+            used[def.key]=true;
+            break;
+          }
+        }
+        if(map[def.key]!==undefined) break;
+      }
+    }
+    return map;
+  }
+
+  function findHeader(rows){
+    var limit=Math.min(rows.length,5);
+    for(var r=0;r<limit;r++){
+      var m=buildColMap(rows[r]);
+      if(m['الرقم الذاتي']!==undefined&&m['الاسم الصريح']!==undefined) return {index:r,map:m};
+    }
+    return null;
+  }
+
+  function headerlessMap(rows){
+    function battish(col){
+      var c=0,t=0;
+      for(var i=0;i<Math.min(rows.length,20);i++){
+        if(rows[i][col]){
+          t++;
+          if(normBatt(rows[i][col])!==null) c++;
+        }
+      }
+      return t?c/t:0;
+    }
+    if(battish(3)>battish(2)&&battish(3)>0.5) return {'الرقم الذاتي':0,'الاسم الصريح':1,'النقطة':2,'الكتيبة':3};
+    return {'الرقم الذاتي':0,'الاسم الصريح':1,'الكتيبة':2,'النقطة':3};
+  }
+
+  function parseCSV(text){
+    var rows=parseRows(text);
+    if(!rows.length) return [];
+    var header=findHeader(rows);
+    var map,start;
+    if(header){
+      map=header.map;
+      start=header.index+1;
+    }else{
+      map=headerlessMap(rows);
+      start=0;
+    }
+    var out=[];
+    for(var r=start;r<rows.length;r++){
+      var line=rows[r];
+      function g(key){
+        var idx=map[key];
+        return idx===undefined?'':String(line[idx]===undefined?'':line[idx]).trim();
+      }
+      var batt=normBatt(g('الكتيبة'));
+      if(batt===null) batt=1;
+      var obj={
+        'الرقم الذاتي':g('الرقم الذاتي'),
+        'الاسم الصريح':g('الاسم الصريح'),
+        'النقطة':g('النقطة'),
+        'الكتيبة':batt
+      };
+      if(obj['الرقم الذاتي']||obj['الاسم الصريح']) out.push(obj);
+    }
+    return out;
+  }
+
+  function defaultRoster(){
+    var list=[],seq=0;
+    for(var b=1;b<=2;b++){
+      for(var i=1;i<=180;i++){
+        seq++;
+        var base=(b===1)?100000:200000;
+        list.push({
+          'الرقم الذاتي':String(base+i),
+          'الاسم الصريح':'عنصر رقم '+String(i).padStart(3,'0'),
+          'النقطة':'النقطة العامة',
+          'الكتيبة':b
+        });
+      }
+    }
+    return list;
+  }
+
+  function soldiersToEmbed(){
+    return parsedSoldiers.map(function(o,i){
+      return {
+        id:'s'+(i+1),
+        'الرقم الذاتي':o['الرقم الذاتي'],
+        'الاسم الصريح':o['الاسم الصريح'],
+        'النقطة':o['النقطة'],
+        'الكتيبة':o['الكتيبة']
+      };
+    });
+  }
+
+  function genKey(list){
+    var s=JSON.stringify(list);
+    var h=0;
+    for(var i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))|0;}
+    return Math.abs(h).toString(36)+'_'+list.length;
+  }
+
+  function renderPreview(){
+    var list=parsedSoldiers;
+    $id('previewCount').textContent=list.length+' عنصر';
+    var box=$id('previewList');
+    box.innerHTML='';
+    if(!list.length){
+      box.innerHTML='<div class="empty-box">لا توجد بيانات بعد — قم باستيراد الملف أولاً</div>';
+      $id('generateBtn').disabled=true;
+      $id('generateBtn').textContent='💾 توليد ملف تفقد المسؤولين المحدث';
+      return;
+    }
+    var b1=list.filter(function(o){return o['الكتيبة']===1;}).length;
+    var b2=list.filter(function(o){return o['الكتيبة']===2;}).length;
+    $id('previewCount').innerHTML='<b>'+list.length+'</b> عنصر — الأولى: '+b1+' | الثانية: '+b2;
+    $id('generateBtn').disabled=false;
+    var shown=list.filter(function(o){return !previewBatt||o['الكتيبة']===previewBatt;});
+    shown.forEach(function(o){
+      var row=document.createElement('div');
+      row.className='p-row';
+      var info=document.createElement('div');
+      info.className='info';
+      var iEl=document.createElement('span');
+      iEl.className='pi';
+      iEl.textContent=o['الرقم الذاتي'];
+      var n=document.createElement('span');
+      n.className='pn';
+      n.textContent=o['الاسم الصريح'];
+      var p=document.createElement('span');
+      p.className='pp';
+      p.textContent='النقطة: '+o['النقطة'];
+      var b=document.createElement('span');
+      b.className='pb';
+      b.textContent=battName(o['الكتيبة']);
+      info.appendChild(iEl);
+      info.appendChild(n);
+      info.appendChild(p);
+      info.appendChild(b);
+      row.appendChild(info);
+      box.appendChild(row);
+    });
+  }
+
+  function setStatus(msg,isErr){
+    var el=$id('importStatus');
+    el.className='status'+(isErr?' err':'');
+    el.textContent=msg;
+  }
+
+  function setPreviewSoldiers(list){
+    parsedSoldiers=list;
+    renderPreview();
+  }
+
+  function importCSV(){
+    var file=$id('csvFile').files[0];
+    if(!file){setStatus('يرجى اختيار ملف CSV أولاً',true);return;}
+    var reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        var text=decodeText(e.target.result);
+        var objs=parseCSV(text);
+        if(!objs.length){setStatus('الملف فارغ أو غير صالح.',true);return;}
+        setPreviewSoldiers(objs);
+        setStatus('تم تحليل الملف بنجاح: '+objs.length+' عنصر.');
+        $id('genNote').textContent='💡 الملف جاهز للتوليد — يحتوي على '+objs.length+' عنصر';
+        $id('csvFile').value='';
+        $id('fileLabel').textContent='📂 اختر ملف CSV / Excel من الجهاز';
+      }catch(err){
+        setStatus('تعذر قراءة الملف: '+err.message,true);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function generate(){
+    if(!parsedSoldiers.length){alert('لا توجد بيانات لتوليد الملف — قم باستيراد ملف أولاً');return;}
+    var embedded=soldiersToEmbed();
+    var tpl=$id('attTpl').textContent;
+    var key=genKey(embedded);
+    var json=JSON.stringify(embedded).replace(/<\//g,'<\\/');
+    var html=tpl
+      .replace('/*__SOLDIERS__*/',json)
+      .replace('__KEY__',key)
+      .replace('__CLOSE_SCRIPT__','</scr'+'ipt>');
+    var blob=new Blob(['\ufeff'+html],{type:'text/html;charset=utf-8;'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url;
+    a.download='Attendance.html';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function(){URL.revokeObjectURL(url);},1500);
+    $id('genStatus').textContent='✓ تم توليد الملف بنجاح — أرسل ملف Attendance.html إلى مسؤولي التفقد';
+  }
+
+  var filters=document.querySelectorAll('.mini');
+  for(var fi=0;fi<filters.length;fi++){
+    filters[fi].addEventListener('click',function(){
+      previewBatt=parseInt(this.getAttribute('data-f'),10);
+      for(var fj=0;fj<filters.length;fj++) filters[fj].classList.remove('active');
+      this.classList.add('active');
+      renderPreview();
+    });
+  }
+
+  $id('importBtn').addEventListener('click',importCSV);
+  $id('fileLabel').addEventListener('click',function(){if(!$id('csvFile').value)$id('csvFile').click();});
+  $id('csvFile').addEventListener('change',function(){
+    var f=$id('csvFile').files[0];
+    if(f) $id('fileLabel').textContent='✓ '+f.name;
+  });
+  $id('defaultBtn').addEventListener('click',function(){
+    setPreviewSoldiers(defaultRoster());
+    setStatus('تم تحميل القائمة الافتراضية (360 عنصراً).');
+    $id('genNote').textContent='💡 تم استخدام القائمة الافتراضية — 360 عنصراً';
+  });
+  $id('generateBtn').addEventListener('click',generate);
+
+  renderPreview();
+})();
+</script>
+
+</body>
+</html>
